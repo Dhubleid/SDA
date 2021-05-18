@@ -1,0 +1,156 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_signed.all;
+
+use work.matrix.all;
+
+entity hadamard is
+	port(
+		w : in mat(15 downto 0);
+		clk : in std_logic; 
+		s : out mat(15 downto 0)
+	);
+end hadamard;
+
+architecture bhv_hadamard of hadamard is
+  
+  component registerFile is 
+	port(
+	   dataIn : in mat(15 downto 0); -- valor para carregar em um registrador
+	   clk : in std_logic; -- clock
+		--	clear : in std_logic_vector (31 downto 0);
+		 regFileOut : out mat(15 downto 0)
+	);
+  end component;
+  signal wi : mat(15 downto 0) := (others=>x"00");
+  signal ai, bi, ci : mat(15 downto 0);
+  signal ws, as, bs, cs : mat(15 downto 0);
+  signal st : mat(15 downto 0);
+begin
+  
+  wr : registerFile port map (dataIn => wi, clk => clk, regFileOut => ws);
+  a  : registerFile port map (dataIn => ai, clk => clk, regFileOut => as);
+  b  : registerFile port map (dataIn => bi, clk => clk, regFileOut => bs);
+  c  : registerFile port map (dataIn => ci, clk => clk, regFileOut => cs);
+	
+	wp: process(clk)
+	begin
+	 if (rising_edge(clk)) then
+	   wi<=w;
+	 end if;
+	end process;
+
+  ap: process(clk)
+	begin
+	 if (rising_edge(clk)) then
+	   
+	   ai(0)<= ws(0) + ws(4);
+	   ai(1)<= ws(8) + ws(12);
+	   ai(2)<= ws(1) + ws(5);
+	   ai(3)<= ws(9) + ws(13);
+	   ai(4)<= ws(2) + ws(6);
+	   ai(5)<= ws(10) + ws(14);
+	   ai(6)<= ws(3) + ws(7);
+	   ai(7)<= ws(11) + ws(15);
+	   ai(8)<= ws(0) - ws(4);
+	   ai(9)<= ws(8) - ws(12);
+	   ai(10)<= ws(1) - ws(5);
+	   ai(11)<= ws(9) - ws(13);
+	   ai(12)<= ws(2) - ws(6);
+	   ai(13)<= ws(10) - ws(14);
+	   ai(14)<= ws(3) - ws(7);
+	   ai(15)<= ws(11) - ws(15);
+
+	 end if;
+	end process;
+
+  bp: process(clk)
+	begin
+	 if (rising_edge(clk)) then
+	   
+	   bi(0)<= as(0) + as(1);
+	   bi(1)<= as(2) + as(3);
+	   bi(2)<= as(4) + as(5);
+	   bi(3)<= as(6) + as(7);
+	   bi(4)<= as(0) - as(1);
+	   bi(5)<= as(2) - as(3);
+	   bi(6)<= as(4) - as(5);
+	   bi(7)<= as(6) - as(7);
+	   bi(8)<= as(8) - as(9);
+	   bi(9)<=  as(10) - as(11);
+	   bi(10)<= as(12) - as(13);
+	   bi(11)<= as(14) - as(15);
+	   bi(12)<= as(8) + as(9);
+	   bi(13)<= as(10) + as(11);
+	   bi(14)<= as(12) + as(13);
+	   bi(15)<= as(14) + as(15);
+	   
+	 end if;
+	end process;
+	
+	cp: process(clk)
+	begin
+	 if (rising_edge(clk)) then
+	   
+	   ci(0)<= bs(0) + bs(1);
+	   ci(1)<= bs(2) + bs(3);
+	   ci(2)<= bs(0) - bs(1);
+	   ci(3)<= bs(2) - bs(3);
+	   ci(4)<= bs(4) + bs(5);
+	   ci(5)<= bs(6) + bs(7);
+	   ci(6)<= bs(4) - bs(5);
+	   ci(7)<= bs(6) - bs(7);
+	   ci(8)<= bs(8) + bs(9);
+	   ci(9)<= bs(10) + bs(11);
+	   ci(10)<= bs(8) - bs(9);
+	   ci(11)<= bs(10) - bs(11);
+	   ci(12)<= bs(12) + bs(13);
+	   ci(13)<= bs(14) + bs(15);
+	   ci(14)<= bs(12) - bs(13);
+	   ci(15)<= bs(14) - bs(15);
+	   
+	 end if;
+	end process;
+	
+	sp: process(clk)
+	begin
+	 if (rising_edge(clk)) then
+	   
+	   st(0)<= cs(0) + cs(1);
+	   st(1)<= cs(0) - cs(1);
+	   st(2)<= cs(2) - cs(3);
+	   st(3)<= cs(2) + cs(3);
+	   st(4)<= cs(4) + cs(5);
+	   st(5)<= cs(4) - cs(5);
+	   st(6)<= cs(6) - cs(7);
+	   st(7)<= cs(6) + cs(7);
+	   st(8)<= cs(8) + cs(9);
+	   st(9)<= cs(8) - cs(9);
+	   st(10)<= cs(10) - cs(11);
+	   st(11)<= cs(10) + cs(11);
+	   st(12)<= cs(12) + cs(13);
+	   st(13)<= cs(12) - cs(13);
+	   st(14)<= cs(14) - cs(15);
+	   st(15)<= cs(14) + cs(15);
+	   
+	 end if;
+	end process;
+	
+	s(0) <= '0'&st(0)(7 downto 1);
+	s(1) <= '0'&st(1)(7 downto 1);
+	s(2) <= '0'&st(2)(7 downto 1);
+	s(3) <= '0'&st(3)(7 downto 1);
+	s(4) <= '0'&st(4)(7 downto 1);
+	s(5) <= '0'&st(5)(7 downto 1);
+	s(6) <= '0'&st(6)(7 downto 1);
+	s(7) <= '0'&st(7)(7 downto 1);
+	s(8) <= '0'&st(8)(7 downto 1);
+	s(9) <= '0'&st(9)(7 downto 1);
+	s(10) <= '0'&st(10)(7 downto 1);
+	s(11) <= '0'&st(11)(7 downto 1);
+	s(12) <= '0'&st(12)(7 downto 1);
+	s(13) <= '0'&st(13)(7 downto 1);
+	s(14) <= '0'&st(14)(7 downto 1);
+	s(15) <= '0'&st(15)(7 downto 1);
+	
+end bhv_hadamard;
